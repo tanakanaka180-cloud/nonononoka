@@ -1167,8 +1167,24 @@
            Logic & UI Rendering
            ========================================= */
         function init() {
-            GameState = { ...GameState, week: 1, funds: 100000, casts: JSON.parse(JSON.stringify(initialCasts)) };
+            GameState = {
+                week: 1, funds: 100000, totalSales: 0, weekSales: 0,
+                rank: "路地裏", rep: 0, pop: 0,
+                ad: "none", adCost: 0, adEffect: 0,
+                casts: JSON.parse(JSON.stringify(initialCasts)), 
+                shifts: {}, waves: [], waveCursor: 0,
+                assignments: {},
+                totalTroubleResolvedCount: 0, totalTrainCount: 0, totalTrainSpent: 0,
+                dismissed: {}, pendingRare: [],
+                originalShifts: {},
+                shiftPenalized: {}
+            };
+            // 初期キャストを全員出勤に設定
+            GameState.casts.forEach(c => GameState.shifts[c.id] = true);
+            
             rollShifts();
+            const rc = document.getElementById("reportContent");
+            if (rc) rc.innerHTML = '<div style="padding: 20px; text-align: center; font-style: italic; opacity: 0.6;">第1週: 開店準備中です。</div>';
             render();
         }
 
@@ -1819,29 +1835,4 @@
         function closeReport() {
             document.getElementById("modalReport").style.display = "none";
             if (GameState.funds < 0) {
-                alert("破産しました…タイトルへ戻ります。");
-                document.getElementById("modalTitle").style.display = "flex";
-                return;
-            }
-            rollShifts();
-            render();
-        }
-
-        /* =========================================
-           Save / Load
-           ========================================= */
-        function saveGame() { localStorage.setItem(" girlsbar_v2", JSON.stringify(GameState)); alert("セーブ完了"); }
-        function loadGame() {
-            const data = localStorage.getItem(" girlsbar_v2");
-            if (!data) return alert("データなし");
-            GameState = JSON.parse(data);
-            render();
-            alert("ロード完了");
-        }
-
-        /* Start */
-        // init(); // Called via startGame()
-    </script>
-</body>
-
-</html>
+                alert("破産しました…
