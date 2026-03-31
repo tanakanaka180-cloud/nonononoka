@@ -1849,4 +1849,30 @@
         function closeReport() {
             document.getElementById("modalReport").style.display = "none";
             if (GameState.funds < 0) {
-                ale
+                alert("破産しました…タイトルへ戻ります。");
+                GameState.casts = []; // キャストリストを空にして、次回のstartGame()でinit()を誘発
+                document.getElementById("modalTitle").style.display = "flex";
+                return;
+            }
+            rollShifts();
+            render();
+        }
+
+        /* =========================================
+           Save / Load
+           ========================================= */
+        function saveGame() { localStorage.setItem(" girlsbar_v2", JSON.stringify(GameState)); alert("セーブ完了"); }
+        function loadGame() {
+            const data = localStorage.getItem(" girlsbar_v2");
+            if (!data) return alert("データなし");
+            GameState = JSON.parse(data);
+            render();
+            alert("ロード完了");
+        }
+
+        /* Start */
+        // init(); // Called via startGame()
+    </script>
+</body>
+
+</html>
