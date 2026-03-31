@@ -821,7 +821,7 @@
                             </div>
                             <div style="flex: 1;">
                                 <label class="input-label">研修費用</label>
-                                <input type="number" id="trainBudget" class="input-field" value="5000" step="1000">
+                                <input type="number" id="trainBudget" class="input-field" value="10000" step="1000" min="10000">
                             </div>
                         </div>
                         <button class="btn btn-primary" style="width: 100%;" onclick="runTraining()">教育を実施する</button>
@@ -1049,11 +1049,11 @@
         ];
 
         const RARE_DEFS = {
-            "カレン": { id: "rare_karen", name: "カレン", img: "img/rare/karen.jpg", look: "クール", nature: "おっとり", aisou: 90, kaiwa: 75, attentiveness: 80, fati: 0, fatiMax: 120, stress: 0, stressMax: 120, lv: 5, exp: 0, salary: 18000, totalSales: 0 },
-            "ユズ": { id: "rare_yuzu", name: "ユズ", img: "img/rare/yuzu.jpg", look: "キュート", nature: "明るい", aisou: 80, kaiwa: 90, attentiveness: 75, fati: 0, fatiMax: 120, stress: 0, stressMax: 120, lv: 5, exp: 0, salary: 18000, totalSales: 0 },
-            "レイナ": { id: "rare_reina", name: "レイナ", img: "img/rare/reina.jpg", look: "ビューティー", nature: "ミステリアス", aisou: 85, kaiwa: 80, attentiveness: 90, fati: 0, fatiMax: 120, stress: 0, stressMax: 120, lv: 5, exp: 0, salary: 18000, totalSales: 0 },
-            "ミナ": { id: "rare_mina", name: "ミナ", img: "img/rare/mina.jpg", look: "セクシー", nature: "陽気", aisou: 75, kaiwa: 85, attentiveness: 80, fati: 0, fatiMax: 120, stress: 0, stressMax: 120, lv: 5, exp: 0, salary: 18000, totalSales: 0 },
-            "アオイ": { id: "rare_aoi", name: "アオイ", img: "img/rare/aoi.jpg", look: "カジュアル", nature: "穏やか", aisou: 80, kaiwa: 80, attentiveness: 85, fati: 0, fatiMax: 120, stress: 0, stressMax: 120, lv: 5, exp: 0, salary: 18000, totalSales: 0 }
+            "カレン": { id: "rare_karen", name: "カレン", img: "img/rare/karen.jpg", look: "クール", nature: "おっとり", aisou: 135, kaiwa: 112, attentiveness: 120, fati: 0, fatiMax: 120, stress: 0, stressMax: 120, lv: 5, exp: 0, salary: 18000, totalSales: 0 },
+            "ユズ": { id: "rare_yuzu", name: "ユズ", img: "img/rare/yuzu.jpg", look: "キュート", nature: "明るい", aisou: 120, kaiwa: 135, attentiveness: 112, fati: 0, fatiMax: 120, stress: 0, stressMax: 120, lv: 5, exp: 0, salary: 18000, totalSales: 0 },
+            "レイナ": { id: "rare_reina", name: "レイナ", img: "img/rare/reina.jpg", look: "ビューティー", nature: "ミステリアス", aisou: 127, kaiwa: 120, attentiveness: 135, fati: 0, fatiMax: 120, stress: 0, stressMax: 120, lv: 5, exp: 0, salary: 18000, totalSales: 0 },
+            "ミナ": { id: "rare_mina", name: "ミナ", img: "img/rare/mina.jpg", look: "セクシー", nature: "陽気", aisou: 112, kaiwa: 127, attentiveness: 120, fati: 0, fatiMax: 120, stress: 0, stressMax: 120, lv: 5, exp: 0, salary: 18000, totalSales: 0 },
+            "アオイ": { id: "rare_aoi", name: "アオイ", img: "img/rare/aoi.jpg", look: "カジュアル", nature: "穏やか", aisou: 120, kaiwa: 120, attentiveness: 127, fati: 0, fatiMax: 120, stress: 0, stressMax: 120, lv: 5, exp: 0, salary: 18000, totalSales: 0 }
         };
 
         /* =========================================
@@ -1414,7 +1414,9 @@
             const budget = parseInt(document.getElementById("trainBudget").value);
             const cast = GameState.casts.find(c => c.id === id);
 
+            if (isNaN(budget) || budget < 10000) return alert("研修費用は10,000円以上に設定してください。");
             if (GameState.funds < budget) return alert("資金が足りません");
+            if (cast.fati >= 100) return alert(`${cast.name}の疲労が溜まりすぎているため、教育できません。休養させてください。`);
 
             const inc = Math.floor(budget / 2000) + rand(1, 3);
             cast[stat] += inc;
@@ -1728,7 +1730,8 @@
             // Salaries & Ad Cost & Maintenance
             const onCasts = GameState.casts.filter(c => GameState.shifts[c.id]);
             const salaries = onCasts.reduce((sum, c) => sum + c.salary, 0);
-            const mCost = MAINTENANCE_COSTS[GameState.rank] || 0;
+            const paidRank = GameState.rank; // 支払った時のランクを記録
+            const mCost = MAINTENANCE_COSTS[paidRank] || 0;
             const costs = salaries + GameState.adCost + mCost;
             GameState.funds -= costs;
 
@@ -1755,7 +1758,7 @@
             });
 
             GameState.week++;
-            showReport(salaries, mCost);
+            showReport(salaries, mCost, paidRank);
             checkRareEvents();
         }
 
@@ -1801,17 +1804,18 @@
             document.getElementById("rareJoinModal").style.display = "none";
         }
 
-        function showReport(salaries, mCost) {
+        function showReport(salaries, mCost, paidRank) {
             const reportHTML = `
                 <div class="stat-grid" style="margin-top:15px;">
                     <div class="stat-item"><span class="stat-label">週売上</span><span class="stat-value" style="color:var(--success);">${yen(GameState.weekSales)}</span></div>
                     <div class="stat-item"><span class="stat-label">週支出</span><span class="stat-value" style="color:var(--danger);">${yen(salaries + GameState.adCost + mCost)}</span></div>
                 </div>
                 <div class="card report-sub-card" style="padding:15px; background:rgba(0,0,0,0.02)">
-                    <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">支出内訳</div>
+                    <div style="font-size:13px; display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid #ddd; padding-bottom:5px;"><span>現在の店舗ランク</span><strong>${GameState.rank}</strong></div>
+                    <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">支出内訳</div>
                     <div style="font-size:11px; display:flex; justify-content:space-between;"><span>人件費 (本日出勤)</span><span>${yen(salaries)}</span></div>
                     <div style="font-size:11px; display:flex; justify-content:space-between; margin-top:5px;"><span>広告・宣伝費</span><span>${yen(GameState.adCost)}</span></div>
-                    <div style="font-size:11px; display:flex; justify-content:space-between; margin-top:5px;"><span>店舗維持費 (${GameState.rank})</span><span>${yen(mCost)}</span></div>
+                    <div style="font-size:11px; display:flex; justify-content:space-between; margin-top:5px;"><span>店舗維持費 (${paidRank})</span><span>${yen(mCost)}</span></div>
                     
                     <div style="font-size:13px; display:flex; justify-content:space-between; margin-top:10px; border-top:1px solid #ddd; padding-top:10px;"><span>知名度 / 評判</span><strong>${GameState.pop} / ${GameState.rep}</strong></div>
                     <div class="report-sep" style="font-size:13px; display:flex; justify-content:space-between; margin-top:10px; border-top: 1px solid #ddd; padding-top: 5px;"><span>今週の純利益</span><strong style="color:var(--success);">${yen(GameState.weekSales - (salaries + GameState.adCost + mCost))}</strong></div>
@@ -1835,4 +1839,30 @@
         function closeReport() {
             document.getElementById("modalReport").style.display = "none";
             if (GameState.funds < 0) {
-                alert("破産しました…
+                alert("破産しました…タイトルへ戻ります。");
+                GameState.casts = []; // キャストリストを空にして、次回のstartGame()でinit()を誘発
+                document.getElementById("modalTitle").style.display = "flex";
+                return;
+            }
+            rollShifts();
+            render();
+        }
+
+        /* =========================================
+           Save / Load
+           ========================================= */
+        function saveGame() { localStorage.setItem(" girlsbar_v2", JSON.stringify(GameState)); alert("セーブ完了"); }
+        function loadGame() {
+            const data = localStorage.getItem(" girlsbar_v2");
+            if (!data) return alert("データなし");
+            GameState = JSON.parse(data);
+            render();
+            alert("ロード完了");
+        }
+
+        /* Start */
+        // init(); // Called via startGame()
+    </script>
+</body>
+
+</html>
