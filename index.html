@@ -148,7 +148,7 @@
 
         /* Header layout */
         .header {
-            background: rgba(255, 255, 255, 0.98);
+            background: var(--card-bg, rgba(255, 255, 255, 0.98));
             backdrop-filter: blur(15px);
             padding: 8px 15px;
             position: sticky;
@@ -720,12 +720,22 @@
             --bg: #1c1c1e; --text: #f2f2f7; --card-bg: rgba(44, 44, 46, 0.9); 
             --primary: #ffd700; --accent: #ffd700; --text-muted: #aeaeb2;
             --shadow: 0 4px 25px rgba(255, 215, 0, 0.3);
+            --wave-card-bg: rgba(30, 30, 32, 0.8);
         } /* プレステージ */
+        body.rank-4 .header { background: rgba(0,0,0,0.8); border-bottom: 2px solid #ffd700; }
+        body.rank-4 .bottom-nav { background: rgba(0,0,0,0.8); border-top: 1px solid #ffd700; }
+        body.rank-4 .card { border: 1px solid rgba(255, 215, 0, 0.2); }
+        body.rank-4 .stat-item { background: rgba(255, 255, 255, 0.08); }
+        body.rank-4 .stat-label { color: #fff; opacity: 0.8; }
+        body.rank-4 #reportContent { color: #fff !important; }
+        body.rank-4 .report-sub-card { background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(255, 215, 0, 0.2) !important; }
+        body.rank-4 .report-sep { border-top: 1px solid rgba(255, 255, 255, 0.1) !important; }
         body.rank-5 { 
             background: linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%);
             --bg: transparent; --text: #fff; --card-bg: rgba(44, 44, 46, 0.9);
             --primary: #ffd700; --accent: #ffd700; --text-muted: #d1d1d6;
             --shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            --wave-card-bg: rgba(30, 30, 32, 0.8);
             border: 4px solid #ffd700;
             box-sizing: border-box;
             min-height: 100vh;
@@ -1566,7 +1576,7 @@
                         <span class="badge" style="background: var(--primary); color: white; padding: 4px 10px; font-size: 11px;">${c.type}</span>
                         <span style="font-size:12px; font-weight: 800; color:var(--text-muted);">${c.nature !== '絡み厄介' ? '内面: ' + c.nature : '<span style="color:var(--danger); font-size: 14px;">⚠️ 絡み厄介</span>'}</span>
                     </div>
-                    <div style="font-size:16px; line-height: 1.4; margin:10px 0; background: #fff; padding: 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 5px;">
+                    <div style="font-size:16px; line-height: 1.4; margin:10px 0; background: var(--wave-card-bg, #fff); color: var(--text); padding: 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 5px;">
                         <div style="display: flex; align-items: baseline; gap: 10px;">
                             <span style="font-size: 11px; color: var(--text-muted); min-width: 40px;">要求:</span>
                             <strong style="color:var(--primary); font-size: 20px;">${c.reqStat}</strong>
@@ -1839,30 +1849,4 @@
         function closeReport() {
             document.getElementById("modalReport").style.display = "none";
             if (GameState.funds < 0) {
-                alert("破産しました…タイトルへ戻ります。");
-                GameState.casts = []; // キャストリストを空にして、次回のstartGame()でinit()を誘発
-                document.getElementById("modalTitle").style.display = "flex";
-                return;
-            }
-            rollShifts();
-            render();
-        }
-
-        /* =========================================
-           Save / Load
-           ========================================= */
-        function saveGame() { localStorage.setItem(" girlsbar_v2", JSON.stringify(GameState)); alert("セーブ完了"); }
-        function loadGame() {
-            const data = localStorage.getItem(" girlsbar_v2");
-            if (!data) return alert("データなし");
-            GameState = JSON.parse(data);
-            render();
-            alert("ロード完了");
-        }
-
-        /* Start */
-        // init(); // Called via startGame()
-    </script>
-</body>
-
-</html>
+                ale
