@@ -734,6 +734,11 @@
         body.rank-5 .header { background: rgba(0,0,0,0.8); border-bottom: 2px solid #ffd700; }
         body.rank-5 .bottom-nav { background: rgba(0,0,0,0.8); border-top: 2px solid #ffd700; }
         body.rank-5 .card { border: 1px solid rgba(255, 215, 0, 0.3); }
+        body.rank-5 .stat-item { background: rgba(255, 255, 255, 0.08); }
+        body.rank-5 .stat-label { color: #fff; opacity: 0.8; }
+        body.rank-5 #reportContent { color: #fff !important; }
+        body.rank-5 .report-sub-card { background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(255, 215, 0, 0.2) !important; }
+        body.rank-5 .report-sep { border-top: 1px solid rgba(255, 255, 255, 0.1) !important; }
     </style>
 </head>
 
@@ -802,8 +807,9 @@
                         <div class="section-title">🎓 キャスト教育</div>
                         <div class="input-group">
                             <label class="input-label">教育対象</label>
-                            <select id="trainTarget" class="input-field"></select>
+                            <select id="trainTarget" class="input-field" onchange="updateTrainPreview()"></select>
                         </div>
+                        <div id="trainPreview" style="margin-top: 15px; margin-bottom: 20px;"></div>
                         <div class="input-group" style="display: flex; gap: 10px;">
                             <div style="flex: 1;">
                                 <label class="input-label">重点項目</label>
@@ -845,7 +851,7 @@
                 <div style="display: flex; gap: 15px; align-items: flex-end; margin-bottom: 20px;">
                     <div class="input-group" style="flex: 1; margin: 0;">
                         <label class="input-label">スカウト予算</label>
-                        <input type="number" id="hireBudget" class="input-field" value="15000" step="5000">
+                        <input type="number" id="hireBudget" class="input-field" value="15000" step="5000" min="10000">
                     </div>
                     <button class="btn btn-primary" style="height: 52px; padding: 0 30px;" onclick="generateCandidates()">候補を探す</button>
                 </div>
@@ -1025,6 +1031,10 @@
         };
 
         const RankSteps = ["路地裏", "大衆店", "人気店", "名店", "プレステージ", "伝説"];
+        const MAINTENANCE_COSTS = {
+            "路地裏": 5000, "大衆店": 15000, "人気店": 40000, 
+            "名店": 100000, "プレステージ": 250000, "伝説": 600000
+        };
         const AdDefs = {
             none: { name: "なし", cost: 0, effect: 0, popUp: 0 },
             sns: { name: "SNS広告", cost: 5000, effect: 0.05, popUp: 0 },
@@ -1343,7 +1353,43 @@
 
         /* Education */
         function renderTrainDropdown() {
-            document.getElementById("trainTarget").innerHTML = GameState.casts.map(c => `<option value="${c.id}">${c.name} (LV.${c.lv})</option>`).join("");
+            const sel = document.getElementById("trainTarget");
+            if (!sel) return;
+            const currentVal = sel.value;
+            sel.innerHTML = GameState.casts.map(c => `<option value="${c.id}">${c.name} (LV.${c.lv})</option>`).join("");
+            
+            // 以前の選択を維持（まだリストに含まれる場合）
+            if (currentVal && GameState.casts.some(c => c.id === currentVal)) {
+                sel.value = currentVal;
+            }
+            updateTrainPreview();
+        }
+
+        function updateTrainPreview() {
+            const id = document.getElementById("trainTarget").value;
+            const preview = document.getElementById("trainPreview");
+            if (!preview) return;
+
+            const c = GameState.casts.find(x => x.id === id);
+            if (!c) {
+                preview.innerHTML = "";
+                return;
+            }
+
+            const nColor = NATURE_COLORS[c.nature] || "#8e44ad";
+            preview.innerHTML = `
+                <div style="display:flex; align-items:center; gap:15px; background:rgba(0,0,0,0.03); padding:10px; border-radius:12px;">
+                    <img src="${c.img}" style="width:60px; height:60px; border-radius:10px; object-fit:cover; border:2px solid var(--primary);">
+                    <div style="flex:1;">
+                        <div style="font-weight:900; font-size:14px; margin-bottom:4px;">${c.name}</div>
+                        <div class="param-group" style="grid-template-columns: repeat(3, 1fr); margin-top:0; background:transparent; padding:0;">
+                            <div class="param-item" style="padding:4px;"><span class="param-label" style="font-size:8px;">愛想</span><span class="param-val" style="font-size:11px;">${c.aisou}</span></div>
+                            <div class="param-item" style="padding:4px;"><span class="param-label" style="font-size:8px;">会話</span><span class="param-val" style="font-size:11px;">${c.kaiwa}</span></div>
+                            <div class="param-item" style="padding:4px;"><span class="param-label" style="font-size:8px;">気配</span><span class="param-val" style="font-size:11px;">${c.attentiveness}</span></div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         function runTraining() {
@@ -1368,6 +1414,7 @@
         /* Scout */
         function generateCandidates() {
             const budget = parseInt(document.getElementById("hireBudget").value);
+            if (isNaN(budget) || budget < 10000) return alert("スカウト予算は10,000円以上に設定してください。");
             if (GameState.funds < budget) return alert("資金が不足しています。");
 
             GameState.funds -= budget;
@@ -1662,21 +1709,29 @@
         async function finishNight() {
             await phaseTitle("RESULTS");
 
-            // Salaries & Ad Cost
+            // Salaries & Ad Cost & Maintenance
             const onCasts = GameState.casts.filter(c => GameState.shifts[c.id]);
             const salaries = onCasts.reduce((sum, c) => sum + c.salary, 0);
-            const costs = salaries + GameState.adCost;
+            const mCost = MAINTENANCE_COSTS[GameState.rank] || 0;
+            const costs = salaries + GameState.adCost + mCost;
             GameState.funds -= costs;
 
             // Popularity & Rank
             GameState.pop = clamp(GameState.pop + AdDefs[GameState.ad].popUp + Math.floor(GameState.rep / 10), 0, 100);
             const rScore = GameState.funds / 20000 + GameState.pop + GameState.rep;
+            const prevRank = GameState.rank;
             GameState.rank = RankSteps[clamp(Math.floor(rScore / 50), 0, 5)];
 
             // Cast EXP & Fatigue
             GameState.casts.forEach(c => {
                 if (GameState.shifts[c.id]) {
-                    c.exp += 50; if (c.exp >= 100) { c.lv++; c.exp = 0; c.aisou += 2; c.kaiwa += 2; c.attentiveness += 2; }
+                    c.exp += 50; 
+                    if (c.exp >= 100) { 
+                        c.lv++; 
+                        c.exp = 0; 
+                        c.aisou += 2; c.kaiwa += 2; c.attentiveness += 2;
+                        c.salary += 500; // 昇給
+                    }
                 } else {
                     c.fati = Math.max(0, c.fati - 30);
                     c.stress = Math.max(0, c.stress - 20);
@@ -1684,7 +1739,7 @@
             });
 
             GameState.week++;
-            showReport(salaries);
+            showReport(salaries, mCost);
             checkRareEvents();
         }
 
@@ -1730,16 +1785,20 @@
             document.getElementById("rareJoinModal").style.display = "none";
         }
 
-        function showReport(salaries) {
+        function showReport(salaries, mCost) {
             const reportHTML = `
                 <div class="stat-grid" style="margin-top:15px;">
                     <div class="stat-item"><span class="stat-label">週売上</span><span class="stat-value" style="color:var(--success);">${yen(GameState.weekSales)}</span></div>
-                    <div class="stat-item"><span class="stat-label">人件費・広告費</span><span class="stat-value" style="color:var(--danger);">${yen(salaries + GameState.adCost)}</span></div>
+                    <div class="stat-item"><span class="stat-label">週支出</span><span class="stat-value" style="color:var(--danger);">${yen(salaries + GameState.adCost + mCost)}</span></div>
                 </div>
-                <div class="card" style="padding:15px; background:rgba(0,0,0,0.02)">
-                    <div style="font-size:13px; display:flex; justify-content:space-between;"><span>店舗ランク</span><strong>${GameState.rank}</strong></div>
-                    <div style="font-size:13px; display:flex; justify-content:space-between; margin-top:10px;"><span>知名度 / 評判</span><strong>${GameState.pop} / ${GameState.rep}</strong></div>
-                    <div style="font-size:13px; display:flex; justify-content:space-between; margin-top:10px; border-top: 1px solid #ddd; padding-top: 5px;"><span>今週の純利益</span><strong style="color:var(--success);">${yen(GameState.weekSales - salaries - GameState.adCost)}</strong></div>
+                <div class="card report-sub-card" style="padding:15px; background:rgba(0,0,0,0.02)">
+                    <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">支出内訳</div>
+                    <div style="font-size:11px; display:flex; justify-content:space-between;"><span>人件費 (本日出勤)</span><span>${yen(salaries)}</span></div>
+                    <div style="font-size:11px; display:flex; justify-content:space-between; margin-top:5px;"><span>広告・宣伝費</span><span>${yen(GameState.adCost)}</span></div>
+                    <div style="font-size:11px; display:flex; justify-content:space-between; margin-top:5px;"><span>店舗維持費 (${GameState.rank})</span><span>${yen(mCost)}</span></div>
+                    
+                    <div style="font-size:13px; display:flex; justify-content:space-between; margin-top:10px; border-top:1px solid #ddd; padding-top:10px;"><span>知名度 / 評判</span><strong>${GameState.pop} / ${GameState.rep}</strong></div>
+                    <div class="report-sep" style="font-size:13px; display:flex; justify-content:space-between; margin-top:10px; border-top: 1px solid #ddd; padding-top: 5px;"><span>今週の純利益</span><strong style="color:var(--success);">${yen(GameState.weekSales - (salaries + GameState.adCost + mCost))}</strong></div>
                 </div>
             `;
 
