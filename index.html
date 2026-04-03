@@ -1543,8 +1543,8 @@ BGM: SUNO AI / Graphics: Gemini (Google)
 
         function startNight() {
             const rankIdx = RankSteps.indexOf(GameState.rank);
-            // ランクが高いほどウェーブ数（接客回数）が増大
-            const waveCount = clamp(rand(3, 5) + Math.floor(rankIdx * 0.8), 2, 8);
+            // ランク指数に応じたウェーブ数を設定 (0:1~3, 1:2~4, ..., 5:6~8)
+            const waveCount = rand(2, 3) + rankIdx;
             GameState.waves = [];
             for (let i = 0; i < waveCount; i++) {
                 GameState.waves.push(generateCustomers());
@@ -1556,14 +1556,11 @@ BGM: SUNO AI / Graphics: Gemini (Google)
 
         function generateCustomers() {
             const rankIdx = RankSteps.indexOf(GameState.rank);
-            // ランクが高いほど同時来客数が増える
+            // ランク3（名店）以上で同時来客数が増える（2〜6人程度）
             const count = rand(1, 3) + (rankIdx >= 3 ? rand(1, 4) : Math.floor(rankIdx / 2));
             const types = ["初心者", "一般", "常連", "ハイグレード", "VIP"];
             
-            // ランク3（名店）未満か以上かでベース価格を切り分け
-            const priceMap = rankIdx < 3 
-                ? { "初心者": 2500, "一般": 3500, "常連": 5000, "ハイグレード": 7500, "VIP": 12000 }
-                : { "初心者": 5000, "一般": 10000, "常連": 20000, "ハイグレード": 50000, "VIP": 120000 };
+            const basePrices = { "初心者": 2500, "一般": 3500, "常連": 5000, "ハイグレード": 7500, "VIP": 12000 };
 
             const res = [];
             for (let i = 0; i < count; i++) {
@@ -1572,7 +1569,7 @@ BGM: SUNO AI / Graphics: Gemini (Google)
                     type, nature: pick(["静か", "陽気", "絡み厄介"]), reqStat: pick(["愛想", "会話", "気配り"]),
                     reqVal: 30 + rand(0, 40),
                     like: { look: pick(["キュート", "クール", "ビューティー", "セクシー", "カジュアル"]), nature: pick(["静か", "陽気"]) },
-                    basePrice: priceMap[type]
+                    basePrice: basePrices[type]
                 });
             }
             return res;
