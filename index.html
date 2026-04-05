@@ -736,7 +736,8 @@
         body.rank-4 .report-sub-card { background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(255, 215, 0, 0.2) !important; }
         body.rank-4 .report-sep { border-top: 1px solid rgba(255, 255, 255, 0.1) !important; }
         body.rank-4 .btn-primary { color: #000 !important; font-weight: 900; }
-        body.rank-4 .modal-content { background: #2c2c2e; color: #fff; border: 1px solid #ffd700; }
+        body.rank-4 .modal-body { background: #2c2c2e; color: #fff; border: 1px solid #ffd700; }
+        body.rank-4 .badge-primary { background: rgba(255, 255, 255, 0.1); color: #ffd700; }
         body.rank-5 { 
             background: linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%);
             --bg: transparent; --text: #fff; --card-bg: rgba(44, 44, 46, 0.9);
@@ -762,7 +763,97 @@
         body.rank-5 .report-sub-card { background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(255, 215, 0, 0.2) !important; }
         body.rank-5 .report-sep { border-top: 1px solid rgba(255, 255, 255, 0.1) !important; }
         body.rank-5 .btn-primary { color: #000 !important; font-weight: 900; }
-        body.rank-5 .modal-content { background: #1c1c1e; color: #fff; border: 2px solid #ffd700; box-shadow: 0 0 40px rgba(255, 215, 0, 0.3); }
+        body.rank-5 .modal-body { background: #1c1c1e; color: #fff; border: 2px solid #ffd700; box-shadow: 0 0 40px rgba(255, 215, 0, 0.3); }
+        body.rank-5 .badge-primary { background: rgba(255, 255, 255, 0.1); color: #ffd700; }
+
+        /* Independent Scroll Layout for Wave Modal */
+        .modal-body-wide {
+            max-width: 1280px;
+            width: 95%;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+
+        .modal-header-fixed {
+            padding: 20px 25px;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            flex: 0 0 auto;
+        }
+
+        .modal-footer-fixed {
+            padding: 20px 25px;
+            border-top: 1px solid rgba(0,0,0,0.08);
+            display: flex;
+            gap: 15px;
+            background: #fafafa;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            flex: 0 0 auto;
+        }
+
+        body.rank-4 .modal-footer-fixed, body.rank-5 .modal-footer-fixed {
+            background: rgba(255,255,255,0.05);
+            border-top: 1px solid rgba(255,215,0,0.2);
+        }
+
+        .modal-content-scroll {
+            flex: 1;
+            overflow: hidden;
+            padding: 20px 25px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .night-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            height: 100%;
+        }
+
+        @media (min-width: 992px) {
+            .night-grid {
+                grid-template-columns: 360px 1fr;
+            }
+        }
+
+        .night-col {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .night-col-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        /* Custom Scrollbar for independent areas */
+        .night-col-scroll::-webkit-scrollbar { width: 6px; }
+        .night-col-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.02); }
+        .night-col-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        
+        body.rank-4 .night-col-scroll::-webkit-scrollbar-track, 
+        body.rank-5 .night-col-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+        body.rank-4 .night-col-scroll::-webkit-scrollbar-thumb,
+        body.rank-5 .night-col-scroll::-webkit-scrollbar-thumb { background: rgba(255,215,0,0.2); }
+
+        #waveAssignArea {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 1200px) {
+            #waveAssignArea {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 
@@ -910,20 +1001,20 @@
             <div class="modal-content-scroll">
                 <div class="night-grid">
                     <!-- Left: Customers -->
-                    <div>
-                        <div style="font-size: 0.9rem; font-weight: 800; color: var(--text-muted); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                    <div class="night-col">
+                        <div style="font-size: 0.9rem; font-weight: 800; color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; flex: 0 0 auto;">
                             <span style="background: var(--primary); width: 4px; height: 16px; border-radius: 2px;"></span>
                             ご来店中のお客様
                         </div>
-                        <div id="waveCustomerArea"></div>
+                        <div id="waveCustomerArea" class="night-col-scroll"></div>
                     </div>
                     <!-- Right: Casts -->
-                    <div>
-                        <div style="font-size: 0.9rem; font-weight: 800; color: var(--text-muted); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                    <div class="night-col">
+                        <div style="font-size: 0.9rem; font-weight: 800; color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; flex: 0 0 auto;">
                             <span style="background: var(--secondary); width: 4px; height: 16px; border-radius: 2px;"></span>
                             出勤中キャスト
                         </div>
-                        <div id="waveAssignArea" style="display: grid; gap: 12px;"></div>
+                        <div id="waveAssignArea" class="night-col-scroll"></div>
                     </div>
                 </div>
             </div>
@@ -1843,14 +1934,14 @@ BGM: SUNO AI / Graphics: Gemini (Google)
                     <div class="stat-item"><span class="stat-label">週支出</span><span class="stat-value" style="color:var(--danger);">${yen(salaries + GameState.adCost + mCost)}</span></div>
                 </div>
                 <div class="card report-sub-card" style="padding:15px; background:rgba(0,0,0,0.02)">
-                    <div style="font-size:13px; display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid rgba(128,128,128,0.3); padding-bottom:5px;"><span>現在の店舗ランク</span><strong>${GameState.rank}</strong></div>
+                    <div style="font-size:13px; display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid rgba(128,128,128,0.2); padding-bottom:5px;"><span>現在の店舗ランク</span><strong>${GameState.rank}</strong></div>
                     <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">支出内訳</div>
                     <div style="font-size:11px; display:flex; justify-content:space-between;"><span>人件費 (本日出勤)</span><span>${yen(salaries)}</span></div>
                     <div style="font-size:11px; display:flex; justify-content:space-between; margin-top:5px;"><span>広告・宣伝費</span><span>${yen(GameState.adCost)}</span></div>
                     <div style="font-size:11px; display:flex; justify-content:space-between; margin-top:5px;"><span>店舗維持費 (${paidRank})</span><span>${yen(mCost)}</span></div>
                     
-                    <div style="font-size:13px; display:flex; justify-content:space-between; margin-top:10px; border-top:1px solid rgba(128,128,128,0.3); padding-top:10px;"><span>知名度 / 評判</span><strong>${GameState.pop} / ${GameState.rep}</strong></div>
-                    <div class="report-sep" style="font-size:13px; display:flex; justify-content:space-between; margin-top:10px; border-top: 1px solid rgba(128,128,128,0.3); padding-top: 5px;"><span>今週の純利益</span><strong style="color:var(--success);">${yen(GameState.weekSales - (salaries + GameState.adCost + mCost))}</strong></div>
+                    <div style="font-size:13px; display:flex; justify-content:space-between; margin-top:10px; border-top:1px solid rgba(128,128,128,0.2); padding-top:10px;"><span>知名度 / 評判</span><strong>${GameState.pop} / ${GameState.rep}</strong></div>
+                    <div class="report-sep" style="font-size:13px; display:flex; justify-content:space-between; margin-top:10px; border-top: 1px solid rgba(128,128,128,0.2); padding-top: 5px;"><span>今週の純利益</span><strong style="color:var(--success);">${yen(GameState.weekSales - (salaries + GameState.adCost + mCost))}</strong></div>
                 </div>
             `;
 
