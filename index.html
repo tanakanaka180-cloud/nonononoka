@@ -854,6 +854,99 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+
+        /* Wave Cast Card Styles */
+        .wave-cast-card {
+            padding: 25px;
+            margin-bottom: 15px;
+            background: var(--wave-card-bg, #fff);
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+            border-radius: 16px;
+        }
+
+        .wave-cast-card-profile {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 15px;
+        }
+
+        .wave-cast-card-avatar {
+            width: 130px;
+            height: 130px;
+            border-radius: 15px;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            flex: 0 0 auto;
+        }
+
+        .wave-cast-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .wave-cast-card-stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .wave-cast-card-stat-item {
+            font-size: 13px;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .wave-cast-card-stat-val {
+            font-size: 18px;
+            color: var(--text);
+        }
+
+        .wave-cast-card-gauges {
+            display: flex;
+            gap: 15px;
+            background: var(--gauge-panel-bg, #f8f9fa);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(128,128,128,0.2);
+        }
+
+        /* Responsive Mobile Wave Cast Card */
+        @media (max-width: 600px) {
+            .wave-cast-card {
+                padding: 15px;
+            }
+            .wave-cast-card-profile {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            .wave-cast-card-avatar {
+                width: 100px;
+                height: 100px;
+                margin: 0 auto;
+            }
+            .wave-cast-card-info {
+                width: 100%;
+            }
+            .wave-cast-card-stats {
+                justify-content: center;
+                gap: 10px;
+            }
+            .wave-cast-card-stat-val {
+                font-size: 15px;
+            }
+            .wave-cast-card-gauges {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .wave-cast-card-gauges > div {
+                flex: none;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 
@@ -1719,30 +1812,30 @@ BGM: SUNO AI / Graphics: Gemini (Google)
                 const nColor = NATURE_COLORS[c.nature] || "#8e44ad";
 
                 return `
-                    <div class="card" style="padding:25px; margin-bottom:15px; background:var(--wave-card-bg, #fff); border:1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.05);">
-                        <div style="display:flex; align-items:center; gap:30px; margin-bottom:15px;">
-                            <img src="${c.img}" style="width:130px; height:130px; border-radius:15px; object-fit:cover; border:3px solid var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                            <div style="flex:1;">
-                                <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px; flex-wrap: wrap;">
+                    <div class="wave-cast-card">
+                        <div class="wave-cast-card-profile">
+                            <img src="${c.img}" class="wave-cast-card-avatar">
+                            <div class="wave-cast-card-info">
+                                <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px; flex-wrap: wrap;" class="wave-cast-card-header">
                                     <div style="font-size:20px; font-weight:900; color:var(--text);">${c.name}</div>
                                     <div style="display: flex; gap: 5px;">
                                         <div style="font-size:10px; font-weight:800; color:#fff; background:${lColor}; padding:2px 10px; border-radius:4px; white-space:nowrap;">${c.look}</div>
                                         <div style="font-size:10px; font-weight:800; color:#fff; background:${nColor}; padding:2px 10px; border-radius:4px; white-space:nowrap;">${c.nature}</div>
                                     </div>
                                 </div>
-                                <div style="display:flex; gap:15px;">
-                                    <div style="font-size:13px; font-weight:900;"><span style="color:var(--primary); border-bottom:3px solid var(--primary);">愛想</span> <span style="font-size:18px; color:var(--text);">${c.aisou}</span></div>
-                                    <div style="font-size:13px; font-weight:900;"><span style="color:var(--secondary); border-bottom:3px solid var(--secondary);">会話</span> <span style="font-size:18px; color:var(--text);">${c.kaiwa}</span></div>
-                                    <div style="font-size:13px; font-weight:900;"><span style="color:var(--warning); border-bottom:3px solid var(--warning);">気配</span> <span style="font-size:18px; color:var(--text);">${c.attentiveness}</span></div>
+                                <div class="wave-cast-card-stats">
+                                    <div class="wave-cast-card-stat-item"><span style="color:var(--primary); border-bottom:3px solid var(--primary);">愛想</span> <span class="wave-cast-card-stat-val">${c.aisou}</span></div>
+                                    <div class="wave-cast-card-stat-item"><span style="color:var(--secondary); border-bottom:3px solid var(--secondary);">会話</span> <span class="wave-cast-card-stat-val">${c.kaiwa}</span></div>
+                                    <div class="wave-cast-card-stat-item"><span style="color:var(--warning); border-bottom:3px solid var(--warning);">気配</span> <span class="wave-cast-card-stat-val">${c.attentiveness}</span></div>
                                 </div>
                             </div>
                         </div>
-                        <div style="display:flex; gap:15px; background:var(--gauge-panel-bg, #f8f9fa); padding:12px; border-radius:12px; border:1px solid rgba(128,128,128,0.2);">
-                            <div style="flex:1;">
+                        <div class="wave-cast-card-gauges">
+                            <div>
                                 <div class="gauge-label" style="margin-bottom:6px; font-size:12px; font-weight: 800; color:var(--text);"><span>疲労度</span><span>${Math.floor(fatiP)}%</span></div>
                                 <div class="gauge-bg" style="height:6px; background:var(--gauge-bg, #e0e0e0);"><div class="gauge-fill" style="width:${fatiP}%; background:${fatiColor};"></div></div>
                             </div>
-                            <div style="flex:1;">
+                            <div>
                                 <div class="gauge-label" style="margin-bottom:6px; font-size:12px; font-weight: 800; color:var(--text);"><span>ストレス</span><span>${Math.floor(stressP)}%</span></div>
                                 <div class="gauge-bg" style="height:6px; background:var(--gauge-bg, #e0e0e0);"><div class="gauge-fill" style="width:${stressP}%; background:${stressColor};"></div></div>
                             </div>
