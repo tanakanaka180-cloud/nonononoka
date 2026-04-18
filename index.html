@@ -1274,18 +1274,11 @@ BGM: SUNO AI / Graphics: Gemini (Google)
 
         const bgmFiles = [
             { name: "曲1 (Default)", path: "sounds/bgm.mp3" },
-            ...Array.from({ length: 24 }, (_, i) => ({ name: `曲 ${i + 1}`, path: `sounds/bgm (${i + 1}).mp3` }))
+            ...Array.from({ length: 28 }, (_, i) => ({ name: `曲 ${i + 1}`, path: `sounds/bgm (${i + 1}).mp3` }))
         ];
 
-        // BGMを最初のユーザー操作で確実に再生する
+        // BGM状態管理
         let bgmStarted = false;
-        function tryPlayBGM() {
-            if (!bgmStarted) {
-                bgm.play().then(() => { bgmStarted = true; }).catch(e => console.log("BGM:", e));
-            }
-        }
-        document.addEventListener('click', tryPlayBGM, { once: true });
-        document.addEventListener('touchstart', tryPlayBGM, { once: true });
 
         function showTab(tabId, el) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -1312,7 +1305,11 @@ BGM: SUNO AI / Graphics: Gemini (Google)
         initBGMPicker();
 
         function startGame() {
-            bgm.play().then(() => { bgmStarted = true; }).catch(e => console.log("BGM Play Error:", e));
+            // 経営開始ボタンが押され、次の画面（メイン準備画面）に遷移するタイミングで再生を開始
+            bgm.play()
+                .then(() => { bgmStarted = true; })
+                .catch(e => console.log("BGM Play failed:", e));
+            
             document.getElementById("modalTitle").style.display = "none";
             closeOptions();
             closeHowToPlay();
